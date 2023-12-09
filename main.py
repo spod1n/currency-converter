@@ -9,23 +9,43 @@ import os
 import json
 
 import requests
+import configparser
 import telebot
-
-from process import handlers, markups
 
 
 # %%
 # FUNCTIONS
-def get_schema(path) -> dict:
-    """Функція для отримання схеми.
+def get_schema(path: str) -> dict:
+    """ Функція для отримання схеми.
 
-    :return: dict
+    :return: (dict) Схема у форматі JSON.
     """
 
     with open(path, 'r', encoding='utf-8') as js_file:
         parameters = json.load(js_file)
 
     return parameters
+
+
+def get_config(section: str, key: str) -> str:
+    """ Функція для отримання значення ключа файла конфігурації.
+
+    :param section: (str) Ім'я секція
+    :param key: (str) Ім'я ключа
+    :return: (str) Значення ключа
+    """
+
+    if os.path.exists(schema['config_path']):
+        config_obj = configparser.ConfigParser()
+        config_obj.read(schema['config_path'])
+
+        # Перевірка, чи існує вказана секція та ключ у конфігураційному файлі
+        if config_obj.has_section(section) and config_obj.has_option(section, key):
+            return config_obj[section][key]
+        else:
+            raise ValueError('Section or key not found in the configuration file..')
+    else:
+        raise ValueError('Configuration file not found..')
 
 
 # %%
@@ -38,8 +58,7 @@ SCHEMA_FILE = 'schema.json'
 
 if __name__ == '__main__':
     schema = get_schema(SCHEMA_FILE)
-    bot = telebot.TeleBot(rule_config.read('telegram', 'token'))
 
-    print(schema)
+    bot = telebot.TeleBot(get_config('telegram', 'token'))
 
     bot.infinity_polling()
