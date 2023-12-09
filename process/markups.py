@@ -1,2 +1,0 @@
-""" Buttons and other settings """
-
