@@ -3,6 +3,8 @@ test.py
 
 # Project folders
 logs/
+tmp/
+docs/
 
 # Python
 __pycache__/
