@@ -1,16 +1,45 @@
-# This is a sample Python script.
+"""
+Point of entry.
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+Klymentii Spodin (2023)
+Python 3.10.6
+"""
+
+import os
+import json
+
+import requests
+import telebot
+
+from process import handlers, markups
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+# %%
+# FUNCTIONS
+def get_schema(path) -> dict:
+    """Функція для отримання схеми.
+
+    :return: dict
+    """
+
+    with open(path, 'r', encoding='utf-8') as js_file:
+        parameters = json.load(js_file)
+
+    return parameters
 
 
-# Press the green button in the gutter to run the script.
+# %%
+# VARIABLES & CONSTANTS
+PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
+os.chdir(PROJECT_PATH)
+
+SCHEMA_FILE = 'schema.json'
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    schema = get_schema(SCHEMA_FILE)
+    bot = telebot.TeleBot(rule_config.read('telegram', 'token'))
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    print(schema)
+
+    bot.infinity_polling()
