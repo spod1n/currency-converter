@@ -12,6 +12,8 @@ import requests
 import configparser
 import telebot
 
+from process import handlers, markup
+
 
 # %%
 # FUNCTIONS
@@ -53,12 +55,15 @@ def get_config(section: str, key: str) -> str:
 PROJECT_PATH = os.path.dirname(os.path.abspath(__file__))
 os.chdir(PROJECT_PATH)
 
-SCHEMA_FILE = 'schema.json'
+
+# %%
+# SCRIPT
+schema = get_schema('schema.json')
+bot = telebot.TeleBot(get_config('telegram', 'token'))
+
+handlers.bot_handlers(bot)
 
 
 if __name__ == '__main__':
-    schema = get_schema(SCHEMA_FILE)
-
-    bot = telebot.TeleBot(get_config('telegram', 'token'))
-
+    print('start polling..')
     bot.infinity_polling()
