@@ -12,53 +12,57 @@ from process import markup
 
 
 def bot_handlers(bot):
-    user_params = {}
+    user_params = dict()
     rate_data = get_rate()
+    schema = get_schema('schema.json')
 
-    @bot.message_handler(commands=['start'])
-    def handle_start(message):
+    rate_data.to_excel('rate_join.xlsx')
+
+    @bot.message_handler(commands=['start', 'привіт', 'вітаю'])
+    def handle_start(message) -> None:
+        """ Обробка старту боту.
+
+        :param message: (object) дані про повідомлення користувача
+        :return: None
+        """
         chat_id = message.chat.id
 
         bot.reply_to(message, f'Вітаю, {message.from_user.username}! Я бот з конвертації валюти.')
         bot.send_message(chat_id, 'Виберіть початкову валюту:',
                          reply_markup=markup.get_text_buttons(rate_data, 'CodeNameA'))
 
-    def save_history(chat_id, user_id, selected_a, selected_b, value_sum, result):
-        history_file_path = 'history.json'
+    def save_history(history_data: dict) -> None:
+        """ Збереження введених даних в JSON.
+
+        :param history_data: (dict) введені дані та інформація про користувача
+        :return: None
+        """
 
         try:
-            with open(history_file_path, 'r') as history_file:
-                history_log = json.load(history_file)
+            with open(schema['history_path'], 'r') as file:
+                history_log = json.load(file)
         except FileNotFoundError:
             history_log = []
 
-        history_entry = {
-            'chat_id': chat_id,
-            'user_id': user_id,
-            'selected_start_currency': selected_a,
-            'selected_end_currency': selected_b,
-            'value_sum': value_sum,
-            'result': result
-        }
+        history_log.append(history_data)
 
-        history_log.append(history_entry)
-
-        history_log = history_log[-10:]
-
-        with open(history_file_path, 'w') as history_file:
-            json.dump(history_log, history_file, indent=4)
+        with open(schema['history_path'], 'w') as file:
+            json.dump(history_log[-10:], file, indent=4)
 
     @bot.callback_query_handler(
         func=lambda call: call.data in rate_data['CodeNameA'].unique().tolist() or
                           call.data in rate_data['CodeNameB'].unique().tolist())
-    def handle_text_selection(call):
+    def handle_text_selection(call) -> None:
+        """ Обробка вибору текстового параметра
+
+        :param call: (object) дані про чат-бот
+        :return: None
+        """
+
         chat_id = call.message.chat.id
         user_id = call.from_user.id
         selected_text = call.data
 
-        user_params[user_id]['username'] = call.message.from_user.username
-
-        # Збереження текстового параметра
         if user_id not in user_params:
             user_params[user_id] = {}
 
@@ -71,30 +75,28 @@ def bot_handlers(bot):
         elif 'CodeNameB' not in user_params[user_id]:
             user_params[user_id]['CodeNameB'] = selected_text
 
-            # Вибір наступного параметра або виведення результату
             if 'value_sum' not in user_params[user_id]:
                 bot.send_message(chat_id, 'Введіть суму конвертації:')
             else:
                 handle_number_input(bot.message.Message(message_json={'chat': {'id': chat_id}}))
 
-    @bot.message_handler(func=lambda message: message.text.isdigit(), content_types=['text'])
-    def handle_number_input(message):
+    @bot.message_handler(func=lambda message: str(message.text).replace('.', '').replace(',', '').isdigit(),
+                         content_types=['text'])
+    def handle_number_input(message) -> None:
         """ Обробник введення числового параметра.
 
-        :param message:
-        :return:
+        :param message: (object) дані про повідомлення користувача
+        :return: None
         """
         chat_id = message.chat.id
         user_id = message.from_user.id
 
-        # Перевірка, що введено число
         try:
-            value_sum = float(message.text)
+            val = float(str(message.text).replace(',', '.').strip())
         except ValueError:
             bot.send_message(chat_id, 'Будь ласка, введіть коректне число.')
             return
 
-        # Перевірка, чи користувач вже вибрав перші два параметри
         if user_id not in user_params or 'CodeNameA' not in user_params[user_id]:
             bot.send_message(chat_id, 'Будь ласка, виберіть початкову валюту.')
             return
@@ -104,30 +106,43 @@ def bot_handlers(bot):
             return
 
         rate_result = rate_data[(rate_data['CodeNameA'] == user_params[user_id]['CodeNameA']) &
-                                (rate_data['CodeNameB'] == user_params[user_id]['CodeNameB'])]
+                               (rate_data['CodeNameB'] == user_params[user_id]['CodeNameB'])]
         if rate_result.shape[0] != 1:
             bot.send_message(chat_id, 'Щось пішло не так.. За вибраними параметрами не можна однозначно відвісти.')
             return
 
-        final_result = rate_result['value'].iloc[0] * value_sum
+        else:
+            result = val / rate_result['value'].iloc[0] if rate_result['rateType'].iloc[0] \
+                else val * rate_result['value'].iloc[0]
 
-        # Збереження числового параметра
-        user_params[user_id]['value_sum'] = value_sum
+            decimal_len = len(str(val).split('.')[1] if '.' in str(val) else '11') + 1
 
-        # Збереження історії запитів
-        save_history(chat_id,
-                     user_id,
-                     user_params[user_id]['CodeNameA'],
-                     user_params[user_id]['CodeNameB'],
-                     value_sum,
-                     final_result)
+            bot.send_message(chat_id, f"*{val}* {rate_result['SymbolA'].iloc[0]}  ==>  "
+                                      f"*{round(result, decimal_len)}* {rate_result['SymbolB'].iloc[0]}",
+                             parse_mode="Markdown")
 
-        # Виведення результату
-        result = f"Фінальний результат: {user_params[user_id]['CodeNameA']} * {user_params[user_id]['CodeNameB']} * {value_sum} = {final_result}"
-        bot.send_message(chat_id, result)
+            save_history(
+                {
+                    'datetime_log': str(dt.datetime.now()),
+                    'chat_id': chat_id,
+                    'user_id': user_id,
+                    'username': message.from_user.username,
+                    'selected_start_currency': user_params[user_id]['CodeNameA'],
+                    'selected_end_currency': user_params[user_id]['CodeNameB'],
+                    'value_sum': val,
+                    'result': result
+                })
+
+        user_params[user_id] = {}
 
 
-def get_rate():
+def get_rate() -> pd.DataFrame:
+    """ Основна функція для отримання даних про конвертацію від API monobank.
+    З даної функції виконується запит на необхідність оновити дані конвертації.
+    Вибірки з бази даних таблиць з даними конвертації та словник валют.
+
+    :return: (dataframe)
+    """
     schema = get_schema('schema.json')
     checking_for_update(schema)
 
@@ -163,16 +178,14 @@ def checking_for_update(schema: dict) -> bool:
                 df_rate['datetime_insert'] = dt.datetime.today()
 
                 df_rate.loc[df_rate['rateCross'].notna(), ['rateBuy', 'rateSell']] = df_rate['rateCross']
-                df_rate.fillna(value=0, inplace=True)
-                df_rate['rateCross'] = df_rate['rateCross'].astype(bool).astype(int)
 
                 tmp_df = df_rate.copy()
-                df_rate.rename(columns={'currencyCodeA': 'codeA', 'currencyCodeB': 'codeB',
-                                        'rateCross': 'is_cross', 'rateBuy': 'value'},
+                df_rate.rename(columns={'currencyCodeA': 'codeA', 'currencyCodeB': 'codeB', 'rateBuy': 'value'},
                                inplace=True)
-                tmp_df.rename(columns={'currencyCodeB': 'codeA', 'currencyCodeA': 'codeB',
-                                       'rateCross': 'is_cross', 'rateSell': 'value'},
+                tmp_df.rename(columns={'currencyCodeB': 'codeA', 'currencyCodeA': 'codeB', 'rateSell': 'value'},
                               inplace=True)
+
+                df_rate['rateType'], tmp_df['rateType'] = 0, 1
 
                 df_rate = pd.concat([df_rate[schema['database']['fields_rate']],
                                      tmp_df[schema['database']['fields_rate']]],
