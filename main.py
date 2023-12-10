@@ -6,10 +6,8 @@ Python 3.10.6
 """
 
 import os
-import json
-
-import requests
 import configparser
+
 import telebot
 
 from process import handlers
@@ -18,7 +16,7 @@ from process import handlers
 # %%
 # FUNCTIONS
 def get_config(section: str, key: str) -> str:
-    """ Функція для отримання значення ключа файла конфігурації.
+    """ Функція для отримання значення ключа файлу конфігурації.
 
     :param section: (str) Ім'я секція
     :param key: (str) Ім'я ключа
