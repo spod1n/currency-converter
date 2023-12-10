@@ -1,0 +1,34 @@
+[
+    {
+        "chat_id": 45833368,
+        "user_id": 45833368,
+        "selected_start_currency": "USD",
+        "selected_end_currency": "EUR",
+        "number_param": 100.0,
+        "result": 108.2
+    },
+    {
+        "chat_id": 45833368,
+        "user_id": 45833368,
+        "selected_start_currency": "USD",
+        "selected_end_currency": "EUR",
+        "number_param": 100.0,
+        "result": 108.2
+    },
+    {
+        "chat_id": 45833368,
+        "user_id": 45833368,
+        "selected_start_currency": "GBP",
+        "selected_end_currency": "UAH",
+        "number_param": 100.0,
+        "result": 4713.38
+    },
+    {
+        "chat_id": 45833368,
+        "user_id": 45833368,
+        "selected_start_currency": "UAH",
+        "selected_end_currency": "EUR",
+        "number_param": 100.0,
+        "result": 4040.0799999999995
+    }
+]
