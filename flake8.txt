@@ -9,6 +9,6 @@ exclude =
     .idea,
     venv
 
-ignore = E501, D100
+ignore = E501, D100, E131
 max-line-lenght = 120 
 max-complexity = 10
