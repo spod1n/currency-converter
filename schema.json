@@ -1,5 +1,6 @@
 {
   "config_path": "config.ini",
+  "history_path": "history.json",
   "monobank_api": "https://api.monobank.ua/bank/currency",
   "database": {
     "name": "database.db",
@@ -7,7 +8,7 @@
       "currency": "currency",
       "rate": "rate"
     },
-    "fields_rate": ["codeA", "codeB", "value", "is_cross", "datetime_update", "datetime_insert"],
-    "fields_rate_join": ["codeA", "CodeNameA", "CurrencyNameA", "SymbolA", "codeB", "CodeNameB", "CurrencyNameB", "SymbolB", "value", "is_cross", "datetime_update", "datetime_insert"]
+    "fields_rate": ["codeA", "codeB", "value", "rateType", "datetime_update", "datetime_insert"],
+    "fields_rate_join": ["codeA", "CodeNameA", "CurrencyNameA", "SymbolA", "codeB", "CodeNameB", "CurrencyNameB", "SymbolB", "value", "rateType", "datetime_update", "datetime_insert"]
   }
 }
