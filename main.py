@@ -12,23 +12,11 @@ import requests
 import configparser
 import telebot
 
-from process import handlers, markup
+from process import handlers
 
 
 # %%
 # FUNCTIONS
-def get_schema(path: str) -> dict:
-    """ Функція для отримання схеми.
-
-    :return: (dict) Схема у форматі JSON.
-    """
-
-    with open(path, 'r', encoding='utf-8') as js_file:
-        parameters = json.load(js_file)
-
-    return parameters
-
-
 def get_config(section: str, key: str) -> str:
     """ Функція для отримання значення ключа файла конфігурації.
 
@@ -58,7 +46,7 @@ os.chdir(PROJECT_PATH)
 
 # %%
 # SCRIPT
-schema = get_schema('schema.json')
+schema = handlers.get_schema('schema.json')
 bot = telebot.TeleBot(get_config('telegram', 'token'))
 
 handlers.bot_handlers(bot)
