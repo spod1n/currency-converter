@@ -1,0 +1,14 @@
+[flake8]
+exclude = 
+    .git,
+    __pychache__,
+    config.ini,
+    logs,
+    tmp,
+    docs,
+    .idea,
+    venv
+
+ignore = E501, D100
+max-line-lenght = 120 
+max-complexity = 10
