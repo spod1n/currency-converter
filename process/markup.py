@@ -4,13 +4,13 @@ import pandas as pd
 from telebot import types
 
 
-def get_text_buttons(rate_data: pd.DataFrame, param_name: str, filter_value: str = None):
+def get_text_buttons(rate_data: pd.DataFrame, param_name: str, filter_value: str = None) -> types:
     """ Функція для створення вбудованих кнопок в чаті.
 
     :param rate_data: (dataframe) датафрейм з даними конвертації валют
     :param param_name: (str) ім'я параметру для вибору
     :param filter_value: (str) default = None. значення "попередньо" введеного параметру.
-    :return:
+    :return: types
     """
     keyboard = types.InlineKeyboardMarkup(row_width=2)
 
