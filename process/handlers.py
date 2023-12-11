@@ -180,7 +180,7 @@ def checking_for_update(schema: dict) -> bool:
         cur.execute(f"SELECT MAX([datetime_insert]) FROM {schema['database']['tables']['rate']}")
         last_date_insert = dt.datetime.strptime(cur.fetchall()[0][0], '%Y-%m-%d %H:%M:%S.%f')
 
-        if (dt.datetime.now() - last_date_insert) >= dt.timedelta(minutes=30):
+        if (dt.datetime.now() - last_date_insert) >= dt.timedelta(minutes=1):
             df_rate = pd.DataFrame(get_response(schema['monobank_api']))
 
             if not df_rate.empty:
