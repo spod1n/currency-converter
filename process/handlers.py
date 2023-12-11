@@ -16,18 +16,24 @@ def bot_handlers(bot):
     rate_data = get_rate()
     schema = get_schema('schema.json')
 
-    rate_data.to_excel('rate_join.xlsx')
+    @bot.message_handler(commands=['start'])
+    def hello_bot(message):
+        bot.reply_to(message, f'Вітаю, {message.from_user.username}! Я бот з конвертації валюти.')
 
-    @bot.message_handler(commands=['start', 'привіт', 'вітаю'])
-    def handle_start(message) -> None:
+    @bot.message_handler(commands=['help'])
+    def help_bot(message):
+        bot.reply_to(message, '/start - Розпочати взаємодію з ботом\n'
+                              '/rate - Конвертація валюти.\n'
+                              '/help - Отримати інформацію про доступні команди.')
+
+    @bot.message_handler(commands=['rate'])
+    def currency_rate_start(message) -> None:
         """ Обробка старту боту.
 
         :param message: (object) дані про повідомлення користувача
         :return: None
         """
         chat_id = message.chat.id
-
-        bot.reply_to(message, f'Вітаю, {message.from_user.username}! Я бот з конвертації валюти.')
         bot.send_message(chat_id, 'Виберіть початкову валюту:',
                          reply_markup=markup.get_text_buttons(rate_data, 'CodeNameA'))
 
@@ -106,7 +112,7 @@ def bot_handlers(bot):
             return
 
         rate_result = rate_data[(rate_data['CodeNameA'] == user_params[user_id]['CodeNameA']) &
-                               (rate_data['CodeNameB'] == user_params[user_id]['CodeNameB'])]
+                                (rate_data['CodeNameB'] == user_params[user_id]['CodeNameB'])]
         if rate_result.shape[0] != 1:
             bot.send_message(chat_id, 'Щось пішло не так.. За вибраними параметрами не можна однозначно відвісти.')
             return
@@ -134,6 +140,10 @@ def bot_handlers(bot):
                 })
 
         user_params[user_id] = {}
+
+    @bot.message_handler(func=lambda message: True)
+    def handle_message(message):
+        help_bot(message)
 
 
 def get_rate() -> pd.DataFrame:
