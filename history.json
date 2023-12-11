@@ -1,15 +1,5 @@
 [
     {
-        "datetime_log": "2023-12-11 01:33:20.250775",
-        "chat_id": 45833368,
-        "user_id": 45833368,
-        "username": "spod1n",
-        "selected_start_currency": "USD",
-        "selected_end_currency": "UAH",
-        "value_sum": 15.0,
-        "result": 550.0500000000001
-    },
-    {
         "datetime_log": "2023-12-11 01:33:59.373190",
         "chat_id": 45833368,
         "user_id": 45833368,
@@ -98,5 +88,15 @@
         "selected_end_currency": "EUR",
         "value_sum": 1.343243,
         "result": 0.033247930734044875
+    },
+    {
+        "datetime_log": "2023-12-11 02:06:31.508345",
+        "chat_id": 45833368,
+        "user_id": 45833368,
+        "username": "spod1n",
+        "selected_start_currency": "EUR",
+        "selected_end_currency": "UAH",
+        "value_sum": 100.0,
+        "result": 3950.0
     }
 ]
